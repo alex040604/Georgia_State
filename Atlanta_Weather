@@ -1,0 +1,129 @@
+library(tidyverse)
+library(lubridate)
+library(ggridges)
+library(gghalves)
+
+weather_atl_raw <- read_csv("data/atl-weather-2019.csv")
+
+weather_atl <- weather_atl_raw %>% 
+  mutate(Month = month(time, label = TRUE, abbr = FALSE),
+         Day = wday(time, label = TRUE, abbr = FALSE))
+         
+ggplot(weather_atl, aes(x = windSpeed)) +
+  geom_histogram(binwidth = 1, color = "white")
+  
+ggplot(weather_atl, aes(x = windSpeed)) +
+  geom_histogram(binwidth = 1, color = "white", boundary = 1) +
+  scale_x_continuous(breaks = seq(0, 12, by = 1))
+  
+  ggplot(weather_atl, aes(x = windSpeed, fill = Month)) +
+  geom_histogram(binwidth = 1, color = "white", boundary = 1) +
+  scale_x_continuous(breaks = seq(0, 12, by = 1))
+  
+  ggplot(weather_atl, aes(x = windSpeed, fill = Month)) +
+  geom_histogram(binwidth = 1, color = "white", boundary = 1) +
+  scale_x_continuous(breaks = seq(0, 12, by = 1)) + 
+  guides(fill = FALSE) +
+  facet_wrap(vars(Month))
+  
+  ggplot(weather_atl, aes(x = windSpeed)) +
+  geom_density(color = "grey20", fill = "grey50")
+  
+  ggplot(weather_atl, aes(x = windSpeed)) +
+  geom_density(color = "grey20", fill = "grey50",
+               bw = 0.1, kernel = "epanechnikov")
+               
+               ggplot(weather_atl, aes(x = windSpeed, fill = Month)) +
+  geom_density(alpha = 0.5)
+  
+  ggplot(weather_atl, aes(x = windSpeed, fill = Month)) +
+  geom_density(alpha = 0.5) +
+  guides(fill = FALSE) +
+  facet_wrap(vars(Month))
+  
+  ggplot(weather_atl, aes(x = windSpeed, y = fct_rev(Month), fill = Month)) +
+  geom_density_ridges() +
+  guides(fill = FALSE)
+  
+  ggplot(weather_atl, aes(x = windSpeed, y = fct_rev(Month), fill = Month)) +
+  geom_density_ridges(quantile_lines = TRUE, quantiles = 2) +
+  guides(fill = FALSE)
+  
+  ggplot(weather_atl, aes(x = temperatureHigh, y = fct_rev(Month), fill = Month)) +
+  geom_density_ridges(quantile_lines = TRUE, quantiles = 2) +
+  guides(fill = FALSE)
+  
+  ggplot(weather_atl, aes(x = temperatureHigh, y = fct_rev(Month), fill = ..x..)) +
+  geom_density_ridges_gradient(quantile_lines = TRUE, quantiles = 2) +
+  scale_fill_viridis_c(option = "plasma") +
+  labs(x = "High temperature", y = NULL, color = "Temp")
+  
+  weather_atl_long <- weather_atl %>% 
+  pivot_longer(cols = c(temperatureLow, temperatureHigh),
+               names_to = "temp_type",
+               values_to = "temp") %>% 
+  # Clean up the new temp_type column so that "temperatureHigh" becomes "High", etc.
+  mutate(temp_type = recode(temp_type, 
+                            temperatureHigh = "High",
+                            temperatureLow = "Low")) %>% 
+  # This is optional—just select a handful of columns
+  select(time, temp_type, temp, Month) 
+
+# Show the first few rows
+head(weather_atl_long)
+
+ggplot(weather_atl_long, aes(x = temp, y = fct_rev(Month), 
+                             fill = ..x.., linetype = temp_type)) +
+  geom_density_ridges_gradient(quantile_lines = TRUE, quantiles = 2) +
+  scale_fill_viridis_c(option = "plasma") +
+  labs(x = "High temperature", y = NULL, color = "Temp")
+  
+  ggplot(weather_atl,
+       aes(y = windSpeed, fill = Day)) +
+  geom_boxplot()
+  
+  ggplot(weather_atl,
+       aes(y = windSpeed, x = Day, fill = Day)) +
+  geom_violin()
+  
+  ggplot(weather_atl,
+       aes(y = windSpeed, x = Day, fill = Day)) +
+  geom_violin() +
+  geom_point(size = 0.5, position = position_jitter(width = 0.1)) +
+  guides(fill = FALSE)
+  
+  ggplot(weather_atl,
+       aes(y = windSpeed, x = Day, fill = Day)) +
+  geom_violin() +
+  stat_summary(geom = "point", fun = "mean", size = 5, color = "white") +
+  geom_point(size = 0.5, position = position_jitter(width = 0.1)) +
+  guides(fill = FALSE)
+  
+  ggplot(weather_atl,
+       aes(y = windSpeed, x = Day, fill = Day)) +
+  geom_violin() +
+  stat_summary(geom = "pointrange", fun.data = "mean_se", size = 1, color = "white") +
+  geom_point(size = 0.5, position = position_jitter(width = 0.1)) +
+  guides(fill = FALSE)
+  
+  ggplot(weather_atl,
+       aes(x = fct_rev(Day), y = temperatureHigh)) +
+  geom_half_point(aes(color = Day), side = "l", size = 0.5) +
+  geom_half_boxplot(aes(fill = Day), side = "r") +
+  guides(color = FALSE, fill = FALSE)
+  
+  ggplot(weather_atl,
+       aes(x = fct_rev(Day), y = temperatureHigh)) +
+  geom_half_point(aes(color = Day), side = "l", size = 0.5) +
+  geom_half_violin(aes(fill = Day), side = "r") +
+  guides(color = FALSE, fill = FALSE)
+  
+  ggplot(weather_atl,
+       aes(x = fct_rev(Day), y = temperatureHigh)) +
+  geom_half_boxplot(aes(fill = Day), side = "l", width = 0.5, nudge = 0.1) +
+  geom_half_point(aes(color = Day), side = "l", size = 0.5) +
+  geom_half_violin(aes(fill = Day), side = "r") +
+  guides(color = FALSE, fill = FALSE) + 
+  coord_flip()
+  
+  
